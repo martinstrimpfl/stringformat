@@ -46,7 +46,7 @@ namespace StringFormat
                 };
            
 
-            var interpolatedFormat = "The meeting {Meeting} is in a conflict with {MeetingInConflict} for {PersonIds} persons.";
+            var interpolatedFormat = "The meeting {Meeting} is in a conflict with {MeetingInConflict} for {PersonIds:0>no person|1>one person|2>two persons|3>many persons}.";
             var compositeDescription = FormatStringConverter.Convert(interpolatedFormat);
 
             var objectAsDictionary = ObjectConverter.ConvertObject(error);
@@ -61,13 +61,13 @@ namespace StringFormat
 
             var errorMessageTenantA =
                 string.Format(
-                    new CustomFormatter(Tenant.TenantA), 
+                    new CompositeFormatter(new CustomFormatter(Tenant.TenantA), new CollectionLengthFormatter()), 
                     compositeDescription.CompositeFormatString, 
                     argsToFormat);
 
             var errorMessageTenantB =
                 string.Format(
-                    new CustomFormatter(Tenant.TenantB),
+                    new CompositeFormatter(new CustomFormatter(Tenant.TenantB), new CollectionLengthFormatter()),
                     compositeDescription.CompositeFormatString,
                     argsToFormat);
 

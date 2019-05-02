@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CollectionLengthFormatter.cs" />
+    <Compile Include="CompositeFormatter.cs" />
     <Compile Include="FormatStringConverter.cs" />
     <Compile Include="ObjectConverter.cs" />
     <Compile Include="Program.cs" />
