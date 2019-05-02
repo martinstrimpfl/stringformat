@@ -38,9 +38,13 @@ namespace StringFormat
                         interpolatedStoredFormat,
                         (current, token) => current.Replace(token.Key, token.Value));
 
+            var compositeFormat2 = "The meeting {0} is in a conflict.";
+            var compositeMessage2 = string.Format(new CustomFormatter(), compositeFormat2, meetingTime);
+
             Console.WriteLine(compositeMessage);
             Console.WriteLine(interpolatedMessage);
             Console.WriteLine(interpolatedStoredMessage);
+            Console.WriteLine(compositeMessage2);
         }
     }
 
@@ -51,5 +55,50 @@ namespace StringFormat
         public TimeSpan StartTime { get; set; }
 
         public TimeSpan EndTime { get; set; }
+    }
+
+    public class CustomFormatter : IFormatProvider, ICustomFormatter
+    {
+
+        public string Format(string format, object arg, IFormatProvider formatProvider)
+        {
+            return Format((dynamic)arg);
+        }
+
+        public object GetFormat(Type formatType)
+        {
+            if (formatType == typeof(ICustomFormatter))
+            {
+                return this;
+            }
+
+            return null;
+        }
+
+        private string Format(MeetingTime meetingTime)
+        {
+            return string.Format(this, "{0}: {1} - {2}", meetingTime.Day, meetingTime.StartTime, meetingTime.EndTime);
+        }
+
+        private static string Format(DayOfWeek dayOfWeek)
+        {
+            switch (dayOfWeek)
+            {
+                case DayOfWeek.Friday: return "F";
+                case DayOfWeek.Wednesday: return "W";
+                case DayOfWeek.Monday: return "M";
+                case DayOfWeek.Tuesday: return "TU";
+                case DayOfWeek.Thursday: return "TH";
+                case DayOfWeek.Saturday: return "SA";
+                case DayOfWeek.Sunday: return "SU";
+            }
+
+            return "??";
+        }
+
+        private string Format(TimeSpan time)
+        {
+            return DateTime.Today.Add(time).ToString("hh:mm", this);
+        }
     }
 }
