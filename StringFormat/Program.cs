@@ -14,6 +14,13 @@ namespace StringFormat
         static void Main(string[] args)
         {
 
+            List<int> numbers = new List<int> { 1, 6, 9 };
+
+            var format = "There {0:0>is no numbers|1>is one number|2>are two numbers|3>are # numbers}.";
+
+            Console.WriteLine(string.Format(new CollectionLengthFormatter(), format, numbers));
+
+
             var meetingTime =
                 new MeetingTime
                 {
