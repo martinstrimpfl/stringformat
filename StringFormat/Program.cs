@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace StringFormat
 {
@@ -21,8 +23,24 @@ namespace StringFormat
 
             var interpolatedMessage = $"The meeting {meetingTime.Day}: {meetingTime.StartTime} - {meetingTime.EndTime} is in a conflict.";
 
+            var runtimeTokens = new Dictionary<string, string>
+            {
+                { "{Day}", meetingTime.Day.ToString() },
+                { "{Start}", meetingTime.StartTime.ToString() },
+                { "{End}", meetingTime.EndTime.ToString() }
+            };
+
+            var interpolatedStoredFormat = "The meeting {Day}: {Start} - {End} is in a conflict.";
+
+            var interpolatedStoredMessage =
+                runtimeTokens
+                    .Aggregate(
+                        interpolatedStoredFormat,
+                        (current, token) => current.Replace(token.Key, token.Value));
+
             Console.WriteLine(compositeMessage);
             Console.WriteLine(interpolatedMessage);
+            Console.WriteLine(interpolatedStoredMessage);
         }
     }
 
