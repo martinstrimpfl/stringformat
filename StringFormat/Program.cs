@@ -22,37 +22,38 @@ namespace StringFormat
                     EndTime = new TimeSpan(12, 0, 0)
                 };
 
-            var compositeFormat = "The meeting {0}: {1} - {2} is in a conflict.";
+            var meetingTimeInConflict =
+                new MeetingTime
+                {
+                    Day = DayOfWeek.Monday,
+                    StartTime = new TimeSpan(9, 0, 0),
+                    EndTime = new TimeSpan(13, 0, 0)
+                };
 
-            var compositeMessage = string.Format(compositeFormat, meetingTime.Day, meetingTime.StartTime, meetingTime.EndTime);
-
-            var interpolatedMessage = $"The meeting {meetingTime.Day}: {meetingTime.StartTime} - {meetingTime.EndTime} is in a conflict.";
-
-            var runtimeTokens = new Dictionary<string, string>
-            {
-                { "{Day}", meetingTime.Day.ToString() },
-                { "{Start}", meetingTime.StartTime.ToString() },
-                { "{End}", meetingTime.EndTime.ToString() }
-            };
-
-            var interpolatedStoredFormat = "The meeting {Day}: {Start} - {End} is in a conflict.";
-
-            var interpolatedStoredMessage =
-                runtimeTokens
-                    .Aggregate(
-                        interpolatedStoredFormat,
-                        (current, token) => current.Replace(token.Key, token.Value));
+            var error =
+                new MeetingError
+                {
+                    Meeting = meetingTime,
+                    MeetingInConflict = meetingTimeInConflict
+                };
+           
 
             var compositeFormat2 = "The meeting {0} is in a conflict.";
 
             var compositeMessage2TenantA = string.Format(new CustomFormatter(Tenant.TenantA), compositeFormat2, meetingTime);
             var compositeMessage2TenantB = string.Format(new CustomFormatter(Tenant.TenantB), compositeFormat2, meetingTime);
 
-            Console.WriteLine(compositeMessage);
-            Console.WriteLine(interpolatedMessage);
-            Console.WriteLine(interpolatedStoredMessage);
-            Console.WriteLine(compositeMessage2TenantA);
-            Console.WriteLine(compositeMessage2TenantB);
+
+            var interpolatedFormat = "The meeting {Meeting} is in a conflict with {MeetingInConflict}.";
+            var compositeDescription = FormatStringConverter.Convert(interpolatedFormat);
+
+            var objectAsDictionary = ObjectConverter.ConvertObject(error);
+
+            Console.WriteLine(compositeDescription.CompositeFormatString);
+            Console.WriteLine(string.Join(",", compositeDescription.OrderedObjectNameList));
+            Console.WriteLine(string.Join(",", objectAsDictionary.Keys));
+            Console.WriteLine(string.Join(",", objectAsDictionary.Values));
+
         }
     }
 
@@ -65,13 +66,20 @@ namespace StringFormat
         public TimeSpan EndTime { get; set; }
     }
 
+    public class MeetingError
+    {
+        public MeetingTime Meeting { get; set; }
+
+        public MeetingTime MeetingInConflict { get; set; }
+    }
+
     public class CustomFormatter : IFormatProvider, ICustomFormatter
     {
-        private readonly string  timeFormat;
+        private readonly string timeFormat;
 
         public CustomFormatter(Tenant tenant)
         {
-            switch(tenant)
+            switch (tenant)
             {
                 case Tenant.TenantA:
                     timeFormat = "hh:mm";
