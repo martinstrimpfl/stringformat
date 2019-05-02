@@ -38,22 +38,33 @@ namespace StringFormat
                 };
            
 
-            var compositeFormat2 = "The meeting {0} is in a conflict.";
-
-            var compositeMessage2TenantA = string.Format(new CustomFormatter(Tenant.TenantA), compositeFormat2, meetingTime);
-            var compositeMessage2TenantB = string.Format(new CustomFormatter(Tenant.TenantB), compositeFormat2, meetingTime);
-
-
             var interpolatedFormat = "The meeting {Meeting} is in a conflict with {MeetingInConflict}.";
             var compositeDescription = FormatStringConverter.Convert(interpolatedFormat);
 
             var objectAsDictionary = ObjectConverter.ConvertObject(error);
 
-            Console.WriteLine(compositeDescription.CompositeFormatString);
-            Console.WriteLine(string.Join(",", compositeDescription.OrderedObjectNameList));
-            Console.WriteLine(string.Join(",", objectAsDictionary.Keys));
-            Console.WriteLine(string.Join(",", objectAsDictionary.Values));
+            var orderedObjectNameList = compositeDescription.OrderedObjectNameList;
+            var argsToFormat = 
+                objectAsDictionary
+                    .Where(k => orderedObjectNameList.Contains(k.Key, StringComparer.OrdinalIgnoreCase))
+                    .OrderBy(k => orderedObjectNameList.IndexOf(k.Key))
+                    .Select(k => k.Value)
+                    .ToArray();
 
+            var errorMessageTenantA =
+                string.Format(
+                    new CustomFormatter(Tenant.TenantA), 
+                    compositeDescription.CompositeFormatString, 
+                    argsToFormat);
+
+            var errorMessageTenantB =
+                string.Format(
+                    new CustomFormatter(Tenant.TenantB),
+                    compositeDescription.CompositeFormatString,
+                    argsToFormat);
+
+            Console.WriteLine(errorMessageTenantA);
+            Console.WriteLine(errorMessageTenantB);
         }
     }
 
