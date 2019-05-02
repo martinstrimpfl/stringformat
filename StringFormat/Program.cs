@@ -4,6 +4,11 @@ using System.Linq;
 
 namespace StringFormat
 {
+    public enum Tenant
+    {
+        TenantA,
+        TenantB
+    }
     class Program
     {
         static void Main(string[] args)
@@ -39,12 +44,15 @@ namespace StringFormat
                         (current, token) => current.Replace(token.Key, token.Value));
 
             var compositeFormat2 = "The meeting {0} is in a conflict.";
-            var compositeMessage2 = string.Format(new CustomFormatter(), compositeFormat2, meetingTime);
+
+            var compositeMessage2TenantA = string.Format(new CustomFormatter(Tenant.TenantA), compositeFormat2, meetingTime);
+            var compositeMessage2TenantB = string.Format(new CustomFormatter(Tenant.TenantB), compositeFormat2, meetingTime);
 
             Console.WriteLine(compositeMessage);
             Console.WriteLine(interpolatedMessage);
             Console.WriteLine(interpolatedStoredMessage);
-            Console.WriteLine(compositeMessage2);
+            Console.WriteLine(compositeMessage2TenantA);
+            Console.WriteLine(compositeMessage2TenantB);
         }
     }
 
@@ -59,6 +67,21 @@ namespace StringFormat
 
     public class CustomFormatter : IFormatProvider, ICustomFormatter
     {
+        private readonly string  timeFormat;
+
+        public CustomFormatter(Tenant tenant)
+        {
+            switch(tenant)
+            {
+                case Tenant.TenantA:
+                    timeFormat = "hh:mm";
+                    break;
+
+                case Tenant.TenantB:
+                    timeFormat = "HH:mm tt";
+                    break;
+            }
+        }
 
         public string Format(string format, object arg, IFormatProvider formatProvider)
         {
@@ -98,7 +121,7 @@ namespace StringFormat
 
         private string Format(TimeSpan time)
         {
-            return DateTime.Today.Add(time).ToString("hh:mm", this);
+            return DateTime.Today.Add(time).ToString(timeFormat, this);
         }
     }
 }
