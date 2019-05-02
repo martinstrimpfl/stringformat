@@ -41,11 +41,12 @@ namespace StringFormat
                 new MeetingError
                 {
                     Meeting = meetingTime,
-                    MeetingInConflict = meetingTimeInConflict
+                    MeetingInConflict = meetingTimeInConflict,
+                    PersonIds = new List<int> { 2, 3}
                 };
            
 
-            var interpolatedFormat = "The meeting {Meeting} is in a conflict with {MeetingInConflict}.";
+            var interpolatedFormat = "The meeting {Meeting} is in a conflict with {MeetingInConflict} for {PersonIds} persons.";
             var compositeDescription = FormatStringConverter.Convert(interpolatedFormat);
 
             var objectAsDictionary = ObjectConverter.ConvertObject(error);
@@ -89,6 +90,9 @@ namespace StringFormat
         public MeetingTime Meeting { get; set; }
 
         public MeetingTime MeetingInConflict { get; set; }
+
+        public List<int> PersonIds { get; set; }
+
     }
 
     public class CustomFormatter : IFormatProvider, ICustomFormatter
@@ -112,6 +116,11 @@ namespace StringFormat
         public string Format(string format, object arg, IFormatProvider formatProvider)
         {
             return Format((dynamic)arg);
+        }
+
+        public string Format(object s)
+        {
+            return null;
         }
 
         public object GetFormat(Type formatType)
